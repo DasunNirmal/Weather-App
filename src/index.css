@@ -1,1 +1,26 @@
 @import "tailwindcss";
+@font-face {
+    font-family: Inter;
+    src: url('./assets/fonts/Inter_28pt-Regular.ttf');
+}
+@font-face {
+    font-family: BebasNeue;
+    src: url('./assets/fonts/BebasNeue-Regular.ttf');
+}
+
+@font-face {
+    font-family: JosefinSans;
+    src: url('./assets/fonts/JosefinSans-Regular.ttf');
+}
+
+@theme {
+    --font-bebas-neue: BebasNeue, 'cursive';
+    --font-inter: Inter, 'sans-serif';
+    --font-josefin-sans: JosefinSans, 'sans-serif';
+}
+
+@layer utilities {
+    .animate-spin-slow {
+        animation: spin 2s linear infinite;
+    }
+}
