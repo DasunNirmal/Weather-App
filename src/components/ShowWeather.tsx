@@ -27,13 +27,15 @@ interface WeatherDataTypes {
 
 export const ShowWeather = () => {
 
-    const api_key = "0cc86d16bf572f78cdc96c096c7627e5";
+    const api_key = "0cc86d16bf572f78cdc96c096c7627e5"; // old one
+    // const api_key = "d1cb0fc2f4114a03dfa3ff86870c89f0"; // my new one
     const api_Endpoint = 'https://api.openweathermap.org/data/2.5/';
 
     const [weatherData, setWeatherData] = useState<WeatherDataTypes | null>(null);
     const [loading, setLoading] = useState(false);
+    const [search, setSearch] = useState("");
 
-    const fetchWeather = async (lat: number, lon: number) => {
+    const fetchedCurrentWeatherData = async (lat: number, lon: number) => {
         const url = `${api_Endpoint}weather?lat=${lat}&lon=${lon}&appid=${api_key}&units=metric`;
         const response = await axios.get(url);
         return response.data;
@@ -43,7 +45,7 @@ export const ShowWeather = () => {
         navigator.geolocation.getCurrentPosition(async (position) => {
                 const { latitude, longitude } = position.coords;
                 Promise.all([
-                    fetchWeather(latitude, longitude)
+                    fetchedCurrentWeatherData(latitude, longitude)
                 ]).then(([weatherData]) => {
                     setWeatherData(weatherData);
                     setLoading(true);
@@ -53,7 +55,7 @@ export const ShowWeather = () => {
                 console.log(error);
             }
         );
-    })
+    }, []);
 
     const iconChanger = (weather: string) => {
         let iconElement: React.ReactNode;
@@ -90,6 +92,34 @@ export const ShowWeather = () => {
         );
     };
 
+    const fetchWeatherData = async (city:string) => {
+        try {
+            const url = `${api_Endpoint}weather?q=${city}&appid=${api_key}&units=metric`;
+            const response = await axios.get(url);
+            const currentSearch : WeatherDataTypes = response.data;
+            return currentSearch;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const handleSearch = async () => {
+        if (search.trim() === "") {
+            return;
+        }
+        try {
+            const currentSearch = await fetchWeatherData(search);
+            if (currentSearch) {
+                setWeatherData(currentSearch);
+            } else {
+                setWeatherData(null); // or some other default value
+            }
+            setSearch("");
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     return (
         <div className='min-h-screen relative'>
             {/*container*/}
@@ -97,10 +127,12 @@ export const ShowWeather = () => {
             bg-blend-overlay flex justify-between items-center flex-col absolute top-40 left-0 right-0 bottom-0 mx-auto'>
                 {/*search div*/}
                 <div className='mt-5 flex justify-evenly items-center w-full'>
-                    <input className='outline-none border border-gray-500 p-2 rounded-[20px] text-center w-4/5 bg-transparent' type="text" placeholder="enter a city"/>
+                    <input className='outline-none border border-gray-500 p-2 rounded-[20px] text-center w-4/5 bg-transparent' type="text" placeholder="enter a city"
+                           value={search}
+                           onChange={(e) => setSearch(e.target.value)}/>
                     {/*search circle*/}
                     <div className='border border-gray-500 w-[42px] h-[42px] rounded-full flex justify-center items-center cursor-pointer'>
-                        <AiOutlineSearch className='text-[26px] text-gray-500'/>
+                        <AiOutlineSearch className='text-[26px] text-gray-500' onClick={handleSearch}/>
                     </div>
                 </div>
 
